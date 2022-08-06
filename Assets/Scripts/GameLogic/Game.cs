@@ -13,8 +13,8 @@ namespace Mancala.GameLogic
 
         public void Start(Player player0, Player player1, bool selectRandomStartPlayer = true)
         {
-            player0.ReadyToPlay(_board);
-            player1.ReadyToPlay(_board);
+            player0.ReadyToPlay(_board, 0);
+            player1.ReadyToPlay(_board, 1);
 
             _players.Add(player0);
             _players.Add(player1);
@@ -47,11 +47,9 @@ namespace Mancala.GameLogic
         {
             if (player != _currentTurnPlayer) return new();
 
-            return Pot.PlayerPots[player]
-                .Where(pot => _board[pot] > 0)
-                .Select(pot => new Action(pot)).ToList();
+            return _board.GetValidActions(player);
         }
-
+        
         private void PerformAction(int player, Action action)
         {
             var validActions = GetValidActions(player);
@@ -65,46 +63,7 @@ namespace Mancala.GameLogic
                 return;
             }
 
-            int opponent = 1 - player;
-            int remainStones = _board[action.TargetPot];
-            _board[action.TargetPot] = 0;
-
-            var cursor = action.TargetPot;
-            while (remainStones > 0)
-            {
-                cursor = cursor.GetNextPot();
-                if (cursor == Pot.ScoringPots[opponent])
-                {
-                    cursor = cursor.GetNextPot();
-                }
-
-                remainStones--;
-                _board[cursor]++;
-            }
-
-            var lastPot = cursor;
-
-            // Special rule #1: Capture
-            if (_board[lastPot] == 1 && Pot.PlayerPots[player].Contains(lastPot))
-            {
-                var opponentPot = lastPot.GetOpponentPot();
-                if (_board[opponentPot] != 0)
-                {
-                    int sum = _board[lastPot] + _board[opponentPot];
-                    _board[lastPot] = 0;
-                    _board[opponentPot] = 0;
-                    _board[Pot.ScoringPots[player]] += sum;
-                }
-            }
-
-            // Special rule #2: Bonus turn
-            int nextTurnPlayer = opponent;
-            if (lastPot == Pot.ScoringPots[player])
-            {
-                nextTurnPlayer = player;
-            }
-
-            _currentTurnPlayer = nextTurnPlayer;
+            _currentTurnPlayer = _board.PerformAction(action);
         }
     }
 }

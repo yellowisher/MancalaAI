@@ -68,6 +68,58 @@ namespace Mancala.GameLogic
                 _stoneCounts.Add(stoneCount);
             }
         }
+        
+        public List<Action> GetValidActions(int player)
+        {
+            return Pot.PlayerPots[player]
+                .Where(pot => this[pot] > 0)
+                .Select(pot => new Action(pot)).ToList();
+        }
+
+        public int PerformAction(Action action)
+        {
+            int player = Pot.PlayerPots[0].Contains(action.TargetPot) ? 0 : 1; 
+            int opponent = 1 - player;
+            int remainStones = this[action.TargetPot];
+            this[action.TargetPot] = 0;
+
+            var cursor = action.TargetPot;
+            while (remainStones > 0)
+            {
+                cursor = cursor.GetNextPot();
+                if (cursor == Pot.ScoringPots[opponent])
+                {
+                    cursor = cursor.GetNextPot();
+                }
+
+                remainStones--;
+                this[cursor]++;
+            }
+
+            var lastPot = cursor;
+
+            // Special rule #1: Capture
+            if (this[lastPot] == 1 && Pot.PlayerPots[player].Contains(lastPot))
+            {
+                var opponentPot = lastPot.GetOpponentPot();
+                if (this[opponentPot] != 0)
+                {
+                    int sum = this[lastPot] + this[opponentPot];
+                    this[lastPot] = 0;
+                    this[opponentPot] = 0;
+                    this[Pot.ScoringPots[player]] += sum;
+                }
+            }
+
+            // Special rule #2: Bonus turn
+            int nextTurnPlayer = opponent;
+            if (lastPot == Pot.ScoringPots[player])
+            {
+                nextTurnPlayer = player;
+            }
+
+            return nextTurnPlayer;
+        }
 
         public bool IsGameEnded
         {
@@ -85,7 +137,7 @@ namespace Mancala.GameLogic
                 return false;
             }
         }
-
+        
         public string ToVisualizeString(Board prevBoard = null, Action? action = null)
         {
             string str = "\t\t<\t  Player 1\t<\n";
