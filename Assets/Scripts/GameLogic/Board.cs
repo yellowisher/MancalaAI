@@ -52,7 +52,7 @@ namespace Mancala.GameLogic
          *       > > Player0 > >
          */
 
-        private readonly List<int> _stoneCounts = new(Pot.PotCount);
+        private readonly int[] _stoneCounts = new int[Pot.PotCount];
 
         public int this[Pot pot]
         {
@@ -65,8 +65,13 @@ namespace Mancala.GameLogic
             for (int i = 0; i < Pot.PotCount; i++)
             {
                 int stoneCount = Pot.ScoringPots.Contains(new Pot(i)) ? 0 : 4;
-                _stoneCounts.Add(stoneCount);
+                _stoneCounts[i] = stoneCount;
             }
+        }
+
+        public Board(Board source)
+        {
+            Array.Copy(source._stoneCounts, _stoneCounts, Pot.PotCount);
         }
         
         public List<Action> GetValidActions(int player)

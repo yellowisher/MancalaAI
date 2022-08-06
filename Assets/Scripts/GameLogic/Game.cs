@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Mancala.Common;
 using UnityEngine;
 
 namespace Mancala.GameLogic
@@ -33,7 +32,7 @@ namespace Mancala.GameLogic
                 log += "\n";
                 log += "\n";
                 
-                var prevBoard = _board.DeepClone();
+                var prevBoard = new Board(_board);
                 PerformAction(_currentTurnPlayer, action);
                 
                 log += _board.ToVisualizeString(prevBoard, action);

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Mancala.Common;
 using Mancala.GameLogic;
 using UnityEngine;
 using Action = Mancala.GameLogic.Action;
@@ -56,7 +55,7 @@ namespace Mancala.AI
                 bestScore = int.MinValue;
                 foreach (var action in board.GetValidActions(playerIndex))
                 {
-                    var newBoard = board.DeepClone();
+                    var newBoard = new Board(board);
                     int nextPlayer = newBoard.PerformAction(action);
 
                     var (_, score) = Minimax(newBoard, depth + 1, nextPlayer);
@@ -73,7 +72,7 @@ namespace Mancala.AI
                 bestScore = int.MaxValue;
                 foreach (var action in board.GetValidActions(playerIndex))
                 {
-                    var newBoard = board.DeepClone();
+                    var newBoard = new Board(board);
                     int nextPlayer = newBoard.PerformAction(action);
 
                     var (_, score) = Minimax(newBoard, depth + 1, nextPlayer);
