@@ -6,16 +6,24 @@ namespace Mancala.GameLogic
 {
     public class Game
     {
+        public Board Board { get; } = new();
+
         private readonly List<Player> _players = new(2);
-        private readonly Board _board = new();
         private int _currentTurnPlayer;
 
-        public Game(Player player0, Player player1)
+        public void Play(Player player0, Player player1, bool selectRandomStartPlayer = true)
         {
+            player0.Game = this;
+            player1.Game = this;
+
             _players.Add(player0);
             _players.Add(player1);
 
-            _currentTurnPlayer = Random.Range(0, _players.Count);
+            if (selectRandomStartPlayer)
+            {
+                _currentTurnPlayer = Random.Range(0, _players.Count);
+            }
+
             Progress();
         }
 
@@ -29,12 +37,13 @@ namespace Mancala.GameLogic
             if (player != _currentTurnPlayer) return new();
 
             return Pot.PlayerPots[player]
-                .Where(pot => _board[pot] > 0)
+                .Where(pot => Board[pot] > 0)
                 .Select(pot => new Action(pot)).ToList();
         }
 
-        public void PerformAction(int player, Action action)
+        public void PerformAction(Player playerInstance, Action action)
         {
+            int player = _players.IndexOf(playerInstance);
             var validActions = GetValidActions(player);
             if (!validActions.Contains(action))
             {
@@ -47,8 +56,8 @@ namespace Mancala.GameLogic
             }
 
             int opponent = 1 - player;
-            int remainStones = _board[action.TargetPot];
-            _board[action.TargetPot] = 0;
+            int remainStones = Board[action.TargetPot];
+            Board[action.TargetPot] = 0;
 
             var cursor = action.TargetPot;
             while (remainStones > 0)
@@ -60,35 +69,35 @@ namespace Mancala.GameLogic
                 }
 
                 remainStones--;
-                _board[cursor]++;
+                Board[cursor]++;
             }
 
             var lastPot = cursor;
-            
+
             // Special rule #1: Capture
-            if (_board[lastPot] == 1 && Pot.PlayerPots[player].Contains(lastPot))
+            if (Board[lastPot] == 1 && Pot.PlayerPots[player].Contains(lastPot))
             {
                 var opponentPot = lastPot.GetOpponentPot();
-                if (_board[opponentPot] != 0)
+                if (Board[opponentPot] != 0)
                 {
-                    int sum = _board[lastPot] + _board[opponentPot];
-                    _board[lastPot] = 0;
-                    _board[opponentPot] = 0;
-                    _board[Pot.ScoringPots[player]] += sum;
+                    int sum = Board[lastPot] + Board[opponentPot];
+                    Board[lastPot] = 0;
+                    Board[opponentPot] = 0;
+                    Board[Pot.ScoringPots[player]] += sum;
                 }
             }
 
             // Check for game end
-            if (_board.IsGameEnded)
+            if (Board.IsGameEnded)
             {
                 for (int p = 0; p < _players.Count; p++)
                 {
-                    _players[p].OnGameEnded(_board[Pot.ScoringPots[p]], _board[Pot.ScoringPots[1 - p]]);
+                    _players[p].OnGameEnded(Board[Pot.ScoringPots[p]], Board[Pot.ScoringPots[1 - p]]);
                 }
-                
+
                 return;
             }
-            
+
             // Special rule #2: Bonus turn
             int nextTurnPlayer = opponent;
             if (lastPot == Pot.ScoringPots[player])
