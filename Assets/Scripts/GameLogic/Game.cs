@@ -6,15 +6,14 @@ namespace Mancala.GameLogic
 {
     public class Game
     {
-        public Board Board { get; } = new();
-
+        private readonly Board _board = new();
         private readonly List<Player> _players = new(2);
         private int _currentTurnPlayer;
 
         public void Start(Player player0, Player player1, bool selectRandomStartPlayer = true)
         {
-            player0.ReadyToPlay(this, 0);
-            player1.ReadyToPlay(this, 1);
+            player0.ReadyToPlay(_board);
+            player1.ReadyToPlay(_board);
 
             _players.Add(player0);
             _players.Add(player1);
@@ -24,12 +23,21 @@ namespace Mancala.GameLogic
                 _currentTurnPlayer = Random.Range(0, _players.Count);
             }
 
-            Progress();
-        }
+            while (!_board.IsGameEnded)
+            {
+                string log = $"{_currentTurnPlayer}'s Turn:\n";
+                log += $"{_board}\n";
+                
+                var action = _players[_currentTurnPlayer].ChooseAction(GetValidActions(_currentTurnPlayer));
+                log += $"Player selected action: {action}\n\n";
+                
+                PerformAction(_currentTurnPlayer, action);
+                log += _board;
 
-        private void Progress()
-        {
-            _players[_currentTurnPlayer].ProcessTurn(GetValidActions(_currentTurnPlayer));
+                Debug.Log(log);
+            }
+            
+            Debug.Log("Game End!");
         }
 
         public List<Action> GetValidActions(int player)
@@ -37,11 +45,11 @@ namespace Mancala.GameLogic
             if (player != _currentTurnPlayer) return new();
 
             return Pot.PlayerPots[player]
-                .Where(pot => Board[pot] > 0)
+                .Where(pot => _board[pot] > 0)
                 .Select(pot => new Action(pot)).ToList();
         }
 
-        public void PerformAction(int player, Action action)
+        private void PerformAction(int player, Action action)
         {
             var validActions = GetValidActions(player);
             if (!validActions.Contains(action))
@@ -55,8 +63,8 @@ namespace Mancala.GameLogic
             }
 
             int opponent = 1 - player;
-            int remainStones = Board[action.TargetPot];
-            Board[action.TargetPot] = 0;
+            int remainStones = _board[action.TargetPot];
+            _board[action.TargetPot] = 0;
 
             var cursor = action.TargetPot;
             while (remainStones > 0)
@@ -68,33 +76,22 @@ namespace Mancala.GameLogic
                 }
 
                 remainStones--;
-                Board[cursor]++;
+                _board[cursor]++;
             }
 
             var lastPot = cursor;
 
             // Special rule #1: Capture
-            if (Board[lastPot] == 1 && Pot.PlayerPots[player].Contains(lastPot))
+            if (_board[lastPot] == 1 && Pot.PlayerPots[player].Contains(lastPot))
             {
                 var opponentPot = lastPot.GetOpponentPot();
-                if (Board[opponentPot] != 0)
+                if (_board[opponentPot] != 0)
                 {
-                    int sum = Board[lastPot] + Board[opponentPot];
-                    Board[lastPot] = 0;
-                    Board[opponentPot] = 0;
-                    Board[Pot.ScoringPots[player]] += sum;
+                    int sum = _board[lastPot] + _board[opponentPot];
+                    _board[lastPot] = 0;
+                    _board[opponentPot] = 0;
+                    _board[Pot.ScoringPots[player]] += sum;
                 }
-            }
-
-            // Check for game end
-            if (Board.IsGameEnded)
-            {
-                for (int p = 0; p < _players.Count; p++)
-                {
-                    _players[p].OnGameEnded(Board[Pot.ScoringPots[p]], Board[Pot.ScoringPots[1 - p]]);
-                }
-
-                return;
             }
 
             // Special rule #2: Bonus turn
@@ -105,7 +102,6 @@ namespace Mancala.GameLogic
             }
 
             _currentTurnPlayer = nextTurnPlayer;
-            Progress();
         }
     }
 }

@@ -4,19 +4,13 @@ namespace Mancala.GameLogic
 {
     public abstract class Player
     {
-        protected Game _game;
-        protected int _playerIndex;
+        protected Board _board;
 
-        public void ReadyToPlay(Game game, int playerIndex)
+        public void ReadyToPlay(Board board)
         {
-            _game = game;
-            _playerIndex = playerIndex;
+            _board = board;
         }
         
-        public abstract void ProcessTurn(List<Action> actions);
-
-        public virtual void OnGameEnded(int myScore, int opponentScore)
-        {
-        }
+        public abstract Action ChooseAction(List<Action> actions);
     }
 }
