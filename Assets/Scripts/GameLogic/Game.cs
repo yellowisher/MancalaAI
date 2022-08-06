@@ -11,10 +11,10 @@ namespace Mancala.GameLogic
         private readonly List<Player> _players = new(2);
         private int _currentTurnPlayer;
 
-        public void Play(Player player0, Player player1, bool selectRandomStartPlayer = true)
+        public void Start(Player player0, Player player1, bool selectRandomStartPlayer = true)
         {
-            player0.Game = this;
-            player1.Game = this;
+            player0.ReadyToPlay(this, 0);
+            player1.ReadyToPlay(this, 1);
 
             _players.Add(player0);
             _players.Add(player1);
@@ -41,9 +41,8 @@ namespace Mancala.GameLogic
                 .Select(pot => new Action(pot)).ToList();
         }
 
-        public void PerformAction(Player playerInstance, Action action)
+        public void PerformAction(int player, Action action)
         {
-            int player = _players.IndexOf(playerInstance);
             var validActions = GetValidActions(player);
             if (!validActions.Contains(action))
             {

@@ -44,7 +44,7 @@ namespace Mancala.GameLogic
          *       < < Player1 < <
          * 
          *      12 11 10  9  8  7
-         *   13					  6
+         *   13					   6
          *       0  1  2  3  4  5
          * 
          *       > > Player0 > >
@@ -82,6 +82,17 @@ namespace Mancala.GameLogic
 
                 return false;
             }
+        }
+        
+        public override string ToString()
+        {
+            string str = "\t\t<\t  Player 1\t<\n";
+            str += Pot.PlayerPots[1].Aggregate("\t", (current, pot) => $"\t{this[pot]}{current}");
+            str += $"\n{this[Pot.ScoringPots[1]]}\t\t\t\t\t\t\t{this[Pot.ScoringPots[0]]}\n";
+            str += Pot.PlayerPots[0].Aggregate("", (current, pot) => $"{current}\t{this[pot]}");
+            str += "\n\t\t<\t  Player 0\t<"; 
+
+            return str;
         }
     }
 }

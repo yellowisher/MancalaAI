@@ -4,7 +4,14 @@ namespace Mancala.GameLogic
 {
     public abstract class Player
     {
-        public Game Game { get; set; }
+        protected Game _game;
+        protected int _playerIndex;
+
+        public void ReadyToPlay(Game game, int playerIndex)
+        {
+            _game = game;
+            _playerIndex = playerIndex;
+        }
         
         public abstract void ProcessTurn(List<Action> actions);
 
