@@ -44,8 +44,8 @@ namespace Mancala.GameLogic
             int player1Score = _board[Pot.ScoringPots[1]];
             
             string resultString = $"Game End! ";
-            if (player0Score < player1Score) resultString += $"{_players[0]} Win!\n";
-            else if (player0Score > player1Score) resultString += $"{_players[1]} Win!\n";
+            if (player0Score > player1Score) resultString += $"{_players[0]} Win!\n";
+            else if (player0Score < player1Score) resultString += $"{_players[1]} Win!\n";
             else resultString += "Draw!\n";
 
             resultString += $"Player 0({player0Score}) Player 1({player1Score})";
