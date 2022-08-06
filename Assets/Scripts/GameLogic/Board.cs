@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace Mancala.GameLogic
 {
@@ -20,13 +21,13 @@ namespace Mancala.GameLogic
         //public static implicit operator int(Pot pot) => pot.Index;
         //public static implicit operator Pot(int index) => new(index);
         public static bool operator ==(Pot p0, Pot p1) => p0.Equals(p1);
-        public static bool operator !=(Pot p0, Pot p1) => !p0.Equals(p1); 
+        public static bool operator !=(Pot p0, Pot p1) => !p0.Equals(p1);
 
         public Pot(int index)
         {
             Index = index;
         }
-        
+
         public Pot GetNextPot() => new((Index + 1) % PotCount);
 
         public Pot GetOpponentPot() => new((PotCount - 2) - Index);
@@ -38,6 +39,7 @@ namespace Mancala.GameLogic
         public override int GetHashCode() => Index.GetHashCode();
     }
 
+    [Serializable]
     public class Board
     {
         /*
@@ -57,7 +59,7 @@ namespace Mancala.GameLogic
             get => _stoneCounts[pot.Index];
             set => _stoneCounts[pot.Index] = value;
         }
-        
+
         public Board()
         {
             for (int i = 0; i < Pot.PotCount; i++)
@@ -83,16 +85,37 @@ namespace Mancala.GameLogic
                 return false;
             }
         }
-        
-        public override string ToString()
+
+        public string ToVisualizeString(Board prevBoard = null, Action? action = null)
         {
             string str = "\t\t<\t  Player 1\t<\n";
-            str += Pot.PlayerPots[1].Aggregate("\t", (current, pot) => $"\t{this[pot]}{current}");
-            str += $"\n{this[Pot.ScoringPots[1]]}\t\t\t\t\t\t\t{this[Pot.ScoringPots[0]]}\n";
-            str += Pot.PlayerPots[0].Aggregate("", (current, pot) => $"{current}\t{this[pot]}");
-            str += "\n\t\t<\t  Player 0\t<"; 
 
+            str += Pot.PlayerPots[1].Reverse().Aggregate("", (current, pot) => $"{current}\t{GetColoredString(pot)}");
+            str += "\n";
+            str += $"{GetColoredString(Pot.ScoringPots[1])}\t\t\t\t\t\t\t{GetColoredString(Pot.ScoringPots[0])}";
+            str += "\n";
+            str += Pot.PlayerPots[0].Aggregate("", (current, pot) => $"{current}\t{GetColoredString(pot)}");
+            str += "\n";
+            str += "\t\t<\t  Player 0\t<";
             return str;
+
+
+            string GetColoredString(Pot pot)
+            {
+                Color? color = null;
+                if (action != null && action.Value.TargetPot == pot)
+                {
+                    color = Color.yellow;
+                }
+                else if (prevBoard != null)
+                {
+                    if (this[pot] > prevBoard[pot]) color = Color.green;
+                    else if (this[pot] < prevBoard[pot]) color = Color.red;
+                }
+
+                if (color == null) return this[pot].ToString();
+                return $"<color=#{ColorUtility.ToHtmlStringRGB(color.Value)}>{this[pot].ToString()}</color>";
+            }
         }
     }
 }

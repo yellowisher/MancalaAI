@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Mancala.Common;
 using UnityEngine;
 
 namespace Mancala.GameLogic
@@ -25,15 +26,17 @@ namespace Mancala.GameLogic
 
             while (!_board.IsGameEnded)
             {
-                string log = $"{_currentTurnPlayer}'s Turn:\n";
-                log += $"{_board}\n";
-                
                 var action = _players[_currentTurnPlayer].ChooseAction(GetValidActions(_currentTurnPlayer));
-                log += $"Player selected action: {action}\n\n";
-                
-                PerformAction(_currentTurnPlayer, action);
-                log += _board;
+                string log = $"{_currentTurnPlayer}'s Turn, Action: {action}\n";
 
+                log += _board.ToVisualizeString();
+                log += "\n";
+                log += "\n";
+                
+                var prevBoard = _board.DeepClone();
+                PerformAction(_currentTurnPlayer, action);
+                
+                log += _board.ToVisualizeString(prevBoard, action);
                 Debug.Log(log);
             }
             
