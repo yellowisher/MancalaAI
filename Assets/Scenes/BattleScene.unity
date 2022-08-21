@@ -170,4 +170,4 @@ MonoBehaviour:
   _player0Type: 2
   _player1Type: 1
   _randomStartPlayer: 0
-  _maxDepthForMinimax: 7
+  _maxDepthForMinimax: 10

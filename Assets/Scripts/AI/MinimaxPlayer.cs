@@ -15,30 +15,31 @@ namespace Mancala.AI
         {
             _maxDepth = maxDepth;
         }
-        
+
         public override Action ChooseAction(List<Action> actions)
         {
-            var (action, score) = Minimax(_board, 0, _playerIndex);
+            var (action, score) = MinimaxAlphaBetaPrune(_board, 0, int.MinValue, int.MaxValue, _playerIndex);
+
             Debug.Log($"<color=yellow>[Minimax]</color> Player {_playerIndex} found best action with score: {score}\n" +
                       $"Leaf node count: {_leafNodeCount}");
-            
+
             _leafNodeCount = 0;
-            
+
             return action;
         }
 
-        private (Action action, int score) Minimax(Board board, int depth, int playerIndex)
+        private (Action action, int score) MinimaxAlphaBetaPrune(Board board, int depth, int alpha, int beta, int playerIndex)
         {
             int myScore = board[Pot.ScoringPots[_playerIndex]];
             int opponentScore = board[Pot.ScoringPots[1 - _playerIndex]];
             int difference = myScore - opponentScore;
-            
+
             if (depth > _maxDepth)
             {
                 _leafNodeCount++;
                 return (default, difference);
             }
-            
+
             if (board.IsGameEnded)
             {
                 _leafNodeCount++;
@@ -48,7 +49,7 @@ namespace Mancala.AI
 
             int bestScore;
             Action bestAction = default;
-            
+
             if (playerIndex == _playerIndex)
             {
                 // My turn; maximize
@@ -58,12 +59,15 @@ namespace Mancala.AI
                     var newBoard = new Board(board);
                     int nextPlayer = newBoard.PerformAction(action);
 
-                    var (_, score) = Minimax(newBoard, depth + 1, nextPlayer);
+                    var (_, score) = MinimaxAlphaBetaPrune(newBoard, depth + 1, alpha, beta, nextPlayer);
                     if (score > bestScore)
                     {
                         bestScore = score;
                         bestAction = action;
                     }
+
+                    if (score >= beta) break; // Opponent is not gonna choose this action anyway
+                    alpha = Math.Max(alpha, score);
                 }
             }
             else
@@ -75,12 +79,15 @@ namespace Mancala.AI
                     var newBoard = new Board(board);
                     int nextPlayer = newBoard.PerformAction(action);
 
-                    var (_, score) = Minimax(newBoard, depth + 1, nextPlayer);
+                    var (_, score) = MinimaxAlphaBetaPrune(newBoard, depth + 1, alpha, beta, nextPlayer);
                     if (score < bestScore)
                     {
                         bestScore = score;
                         bestAction = action;
                     }
+
+                    if (score <= alpha) break; // I'm not gonna choose this action anyway
+                    beta = Math.Min(beta, score);
                 }
             }
 
