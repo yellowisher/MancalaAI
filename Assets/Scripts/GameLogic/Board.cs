@@ -52,9 +52,9 @@ namespace Mancala.GameLogic
          *       > > Player0 > >
          */
 
-        private readonly int[] _stoneCounts = new int[Pot.PotCount];
+        private readonly byte[] _stoneCounts = new byte[Pot.PotCount];
 
-        public int this[Pot pot]
+        public byte this[Pot pot]
         {
             get => _stoneCounts[pot.Index];
             set => _stoneCounts[pot.Index] = value;
@@ -64,7 +64,7 @@ namespace Mancala.GameLogic
         {
             for (int i = 0; i < Pot.PotCount; i++)
             {
-                int stoneCount = Pot.ScoringPots.Contains(new Pot(i)) ? 0 : 4;
+                byte stoneCount = (byte)(Pot.ScoringPots.Contains(new Pot(i)) ? 0 : 4);
                 _stoneCounts[i] = stoneCount;
             }
         }
@@ -109,7 +109,7 @@ namespace Mancala.GameLogic
                 var opponentPot = lastPot.GetOpponentPot();
                 if (this[opponentPot] != 0)
                 {
-                    int sum = this[lastPot] + this[opponentPot];
+                    byte sum = (byte)(this[lastPot] + this[opponentPot]);
                     this[lastPot] = 0;
                     this[opponentPot] = 0;
                     this[Pot.ScoringPots[player]] += sum;

@@ -168,6 +168,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _player0Type: 2
-  _player1Type: 1
+  _player1Type: 2
   _randomStartPlayer: 0
   _maxDepthForMinimax: 10

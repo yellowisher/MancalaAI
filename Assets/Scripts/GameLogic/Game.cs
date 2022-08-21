@@ -23,6 +23,7 @@ namespace Mancala.GameLogic
                 _currentTurnPlayer = Random.Range(0, _players.Count);
             }
 
+            double startTime = Time.realtimeSinceStartupAsDouble;
             while (!_board.IsGameEnded)
             {
                 var action = _players[_currentTurnPlayer].ChooseAction(GetValidActions(_currentTurnPlayer));
@@ -47,7 +48,8 @@ namespace Mancala.GameLogic
             else if (player0Score < player1Score) resultString += $"{_players[1]} Win!\n";
             else resultString += "Draw!\n";
 
-            resultString += $"Player 0({player0Score}) Player 1({player1Score})";
+            resultString += $"Player 0({player0Score}) Player 1({player1Score})\n";
+            resultString += $"Playing time: {Time.realtimeSinceStartupAsDouble - startTime}";
             Debug.Log(resultString);
         }
 
