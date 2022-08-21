@@ -39,8 +39,7 @@ namespace Mancala.GameLogic
         public override int GetHashCode() => Index.GetHashCode();
     }
 
-    [Serializable]
-    public class Board
+    public unsafe struct Board
     {
         /*
          *       < < Player1 < <
@@ -52,38 +51,37 @@ namespace Mancala.GameLogic
          *       > > Player0 > >
          */
 
-        private readonly byte[] _stoneCounts = new byte[Pot.PotCount];
+        private fixed byte _stoneCounts[Pot.PotCount];
 
         public byte this[Pot pot]
         {
-            get => _stoneCounts[pot.Index];
+            readonly get => _stoneCounts[pot.Index];
             set => _stoneCounts[pot.Index] = value;
         }
 
-        public Board()
+        public void Initialize()
         {
             for (int i = 0; i < Pot.PotCount; i++)
             {
                 byte stoneCount = (byte)(Pot.ScoringPots.Contains(new Pot(i)) ? 0 : 4);
-                _stoneCounts[i] = stoneCount;
+                this[new Pot(i)] = stoneCount;
             }
         }
 
-        public Board(Board source)
+        public readonly List<Action> GetValidActions(int player)
         {
-            Array.Copy(source._stoneCounts, _stoneCounts, Pot.PotCount);
-        }
-        
-        public List<Action> GetValidActions(int player)
-        {
-            return Pot.PlayerPots[player]
-                .Where(pot => this[pot] > 0)
-                .Select(pot => new Action(pot)).ToList();
+            var actions = new List<Action>();
+            foreach (var pot in Pot.PlayerPots[player])
+            {
+                if (this[pot] > 0) actions.Add(new Action(pot));
+            }
+
+            return actions;
         }
 
         public int PerformAction(Action action)
         {
-            int player = Pot.PlayerPots[0].Contains(action.TargetPot) ? 0 : 1; 
+            int player = Pot.PlayerPots[0].Contains(action.TargetPot) ? 0 : 1;
             int opponent = 1 - player;
             int remainStones = this[action.TargetPot];
             this[action.TargetPot] = 0;
@@ -132,7 +130,9 @@ namespace Mancala.GameLogic
             {
                 for (int player = 0; player < 2; player++)
                 {
-                    int leftStoneCount = Pot.PlayerPots[player].Sum(pot => this[pot]);
+                    int leftStoneCount = 0;
+                    foreach (var pot in Pot.PlayerPots[player]) leftStoneCount += this[pot];
+
                     if (leftStoneCount == 0)
                     {
                         return true;
@@ -142,8 +142,8 @@ namespace Mancala.GameLogic
                 return false;
             }
         }
-        
-        public string ToVisualizeString(Board prevBoard = null, Action? action = null)
+
+        public static string ToVisualizeString(Board board, Board? prevBoard = null, Action? action = null)
         {
             string str = "\t\t<\t  Player 1\t<\n";
 
@@ -166,12 +166,12 @@ namespace Mancala.GameLogic
                 }
                 else if (prevBoard != null)
                 {
-                    if (this[pot] > prevBoard[pot]) color = Color.green;
-                    else if (this[pot] < prevBoard[pot]) color = Color.red;
+                    if (board[pot] > prevBoard.Value[pot]) color = Color.green;
+                    else if (board[pot] < prevBoard.Value[pot]) color = Color.red;
                 }
 
-                if (color == null) return this[pot].ToString();
-                return $"<color=#{ColorUtility.ToHtmlStringRGB(color.Value)}>{this[pot].ToString()}</color>";
+                if (color == null) return board[pot].ToString();
+                return $"<color=#{ColorUtility.ToHtmlStringRGB(color.Value)}>{board[pot].ToString()}</color>";
             }
         }
     }

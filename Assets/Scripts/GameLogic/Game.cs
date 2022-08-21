@@ -1,19 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Mancala.GameLogic
 {
     public class Game
     {
-        private readonly Board _board = new();
+        private Board _board;
         private readonly List<Player> _players = new(2);
         private int _currentTurnPlayer;
 
         public void Start(Player player0, Player player1, bool selectRandomStartPlayer = true)
         {
-            player0.ReadyToPlay(_board, 0);
-            player1.ReadyToPlay(_board, 1);
+            _board.Initialize();
+            player0.ReadyToPlay(0);
+            player1.ReadyToPlay(1);
 
             _players.Add(player0);
             _players.Add(player1);
@@ -26,17 +29,17 @@ namespace Mancala.GameLogic
             double startTime = Time.realtimeSinceStartupAsDouble;
             while (!_board.IsGameEnded)
             {
-                var action = _players[_currentTurnPlayer].ChooseAction(GetValidActions(_currentTurnPlayer));
+                var action = _players[_currentTurnPlayer].ChooseAction(_board);
                 string log = $"{_currentTurnPlayer}'s Turn, Action: {action}\n";
 
-                log += _board.ToVisualizeString();
+                log += Board.ToVisualizeString(_board);
                 log += "\n";
                 log += "\n";
                 
-                var prevBoard = new Board(_board);
+                var prevBoard = _board;
                 PerformAction(_currentTurnPlayer, action);
                 
-                log += _board.ToVisualizeString(prevBoard, action);
+                log += Board.ToVisualizeString(_board, prevBoard, action);
                 Debug.Log(log);
             }
 
@@ -52,17 +55,10 @@ namespace Mancala.GameLogic
             resultString += $"Playing time: {Time.realtimeSinceStartupAsDouble - startTime}";
             Debug.Log(resultString);
         }
-
-        public List<Action> GetValidActions(int player)
-        {
-            if (player != _currentTurnPlayer) return new();
-
-            return _board.GetValidActions(player);
-        }
         
         private void PerformAction(int player, Action action)
         {
-            var validActions = GetValidActions(player);
+            var validActions = _board.GetValidActions(player);
             if (!validActions.Contains(action))
             {
                 Debug.LogError($"Player {player} tried invalid action.\n" +
@@ -70,7 +66,7 @@ namespace Mancala.GameLogic
                                $"Selected action: {action}\n" +
                                $"While valid actions are: {string.Concat(validActions.Select(a => $"{a}, "))}");
 
-                return;
+                throw new Exception();
             }
 
             _currentTurnPlayer = _board.PerformAction(action);

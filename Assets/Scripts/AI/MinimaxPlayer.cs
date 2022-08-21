@@ -16,9 +16,9 @@ namespace Mancala.AI
             _maxDepth = maxDepth;
         }
 
-        public override Action ChooseAction(List<Action> actions)
+        public override Action ChooseAction(in Board board)
         {
-            var (action, score) = MinimaxAlphaBetaPrune(_board, 0, int.MinValue, int.MaxValue, _playerIndex);
+            var (action, score) = MinimaxAlphaBetaPrune(board, 0, int.MinValue, int.MaxValue, _playerIndex);
 
             Debug.Log($"<color=yellow>[Minimax]</color> Player {_playerIndex} found best action with score: {score}\n" +
                       $"Leaf node count: {_leafNodeCount}");
@@ -28,7 +28,7 @@ namespace Mancala.AI
             return action;
         }
 
-        private (Action action, int score) MinimaxAlphaBetaPrune(Board board, int depth, int alpha, int beta, int playerIndex)
+        private (Action action, int score) MinimaxAlphaBetaPrune(in Board board, int depth, int alpha, int beta, int playerIndex)
         {
             int myScore = board[Pot.ScoringPots[_playerIndex]];
             int opponentScore = board[Pot.ScoringPots[1 - _playerIndex]];
@@ -56,7 +56,7 @@ namespace Mancala.AI
                 bestScore = int.MinValue;
                 foreach (var action in board.GetValidActions(playerIndex))
                 {
-                    var newBoard = new Board(board);
+                    var newBoard = board;
                     int nextPlayer = newBoard.PerformAction(action);
 
                     var (_, score) = MinimaxAlphaBetaPrune(newBoard, depth + 1, alpha, beta, nextPlayer);
@@ -76,7 +76,7 @@ namespace Mancala.AI
                 bestScore = int.MaxValue;
                 foreach (var action in board.GetValidActions(playerIndex))
                 {
-                    var newBoard = new Board(board);
+                    var newBoard = board;
                     int nextPlayer = newBoard.PerformAction(action);
 
                     var (_, score) = MinimaxAlphaBetaPrune(newBoard, depth + 1, alpha, beta, nextPlayer);
