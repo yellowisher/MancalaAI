@@ -9,6 +9,8 @@ namespace Mancala.AI
     public class MinimaxPlayer : Player
     {
         public int MaxDepth = 10;
+        public int MoreThanHalfWeight = 1000;
+        public int DifferenceWeight = 1;
         
         private int _leafNodeCount;
 
@@ -30,22 +32,21 @@ namespace Mancala.AI
             int opponentScore = board[Pot.ScoringPots[1 - _playerIndex]];
             int difference = myScore - opponentScore;
 
-            int moreThanHalfScore = 0;
-            if (myScore > Board.HalfOfTotalStoneCount) moreThanHalfScore = 1;
-            else if (opponentScore > Board.HalfOfTotalStoneCount) moreThanHalfScore = -1;
-            moreThanHalfScore *= 1000;
-            
+            int moreThanHalf = 0;
+            if (myScore > Board.HalfOfTotalStoneCount) moreThanHalf = 1;
+            else if (opponentScore > Board.HalfOfTotalStoneCount) moreThanHalf = -1;
+
+            int evaluatedScore = moreThanHalf * MoreThanHalfWeight + difference * DifferenceWeight;
             if (depth > MaxDepth)
             {
                 _leafNodeCount++;
-                return (default, moreThanHalfScore + difference);
+                return (default, evaluatedScore);
             }
 
             if (board.IsGameEnded)
             {
                 _leafNodeCount++;
-                int score = moreThanHalfScore + difference;
-                return (default, score);
+                return (default, evaluatedScore);
             }
 
             int bestScore;

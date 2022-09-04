@@ -19,14 +19,12 @@ namespace Mancala.AI
         {
             var root = new Node(default, board, _playerIndex, null);
 
-            int count = IterationCount; 
+            int count = IterationCount;
             while (count-- > 0)
             {
                 var bestUctNode = SelectLeafNodeWithBestUcb(root);
-                if (!bestUctNode.Board.IsGameEnded)
-                {
-                    ExpandNode(bestUctNode);
-                }
+                
+                ExpandNode(bestUctNode);
 
                 var nodeToExplore = bestUctNode;
                 if (nodeToExplore.Children.Count != 0)
@@ -34,11 +32,19 @@ namespace Mancala.AI
                     nodeToExplore = nodeToExplore.Children.PickRandom();
                 }
 
-                int simulateResult = SimulateRandomPlayout(nodeToExplore);
-                BackPropagate(nodeToExplore, simulateResult);
+                int winner = SimulateRandomPlayout(nodeToExplore);
+                BackPropagate(nodeToExplore, winner);
             }
-
+            
+            // Why robust?
+            // https://ai.stackexchange.com/questions/16905/mcts-how-to-choose-the-final-action-from-the-root
             var bestChild = root.Children.OrderByDescending(child => child.VisitCount).First();
+
+            string message = $"<color=yellow>[Mcts]</color> Player {_playerIndex} found best action {bestChild.Action}";
+            message = root.Children.Aggregate(message, (current, child) => current + $"\nAction {child.Action}, Visit: {child.VisitCount}, Score: {child.Score}, Ucb: {child.CalculateUcb(root.VisitCount, ExplorationFactor)}");
+
+            Debug.Log(message);
+
             return bestChild.Action;
         }
     }
@@ -64,6 +70,13 @@ namespace Mancala.AI
                 CurrentPlayer = currentPlayer;
                 Parent = parent;
             }
+
+            public float CalculateUcb(int totalVisitCount, float explorationFactor)
+            {
+                float exploitation = (float)Score / VisitCount;
+                float exploration =  MathF.Sqrt(MathF.Log(totalVisitCount) / VisitCount);
+                return exploitation + explorationFactor * exploration;
+            }
         }
 
         private Node SelectLeafNodeWithBestUcb(Node node)
@@ -78,9 +91,7 @@ namespace Mancala.AI
                     float ucb = float.MaxValue;
                     if (child.VisitCount > 0)
                     {
-                        float exploitation = (float)child.Score / child.VisitCount;
-                        float exploration =  MathF.Sqrt(MathF.Log(node.VisitCount) / child.VisitCount);
-                        ucb = exploitation + ExplorationFactor * exploration;
+                        ucb = child.CalculateUcb(node.VisitCount, ExplorationFactor);
                     }
 
                     if (ucb > bestUcb)
@@ -122,15 +133,28 @@ namespace Mancala.AI
 
             int playerScore = board[Pot.ScoringPots[_playerIndex]];
             int opponentScore = board[Pot.ScoringPots[1 - _playerIndex]];
-            return Math.Sign(playerScore - opponentScore);
+            
+            // Sign of score difference to winner (-1 when draw)
+            return Math.Sign(playerScore - opponentScore) switch
+            {
+                1 => 0,
+                0 => -1,
+                -1 => 1,
+            };
         }
 
-        private void BackPropagate(Node node, int result)
+        private void BackPropagate(Node node, int winner)
         {
             while (node != null)
             {
                 node.VisitCount++;
-                node.Score += result;
+
+                // Do not calculate score of root node
+                if (node.Parent != null && winner != -1)
+                {
+                    node.Score += winner == node.Parent.CurrentPlayer ? 1 : -1;
+                }
+
                 node = node.Parent;
             }
         }

@@ -72,6 +72,8 @@ namespace Mancala.GameLogic
 
         public readonly List<Action> GetValidActions(int player)
         {
+            if (IsGameEnded) return new();
+
             var actions = new List<Action>();
             foreach (var pot in Pot.PlayerPots[player])
             {
@@ -139,7 +141,7 @@ namespace Mancala.GameLogic
             return nextTurnPlayer;
         }
 
-        private int GetStoneClearedPlayer()
+        private readonly int GetStoneClearedPlayer()
         {
             for (int player = 0; player < 2; player++)
             {
@@ -155,7 +157,7 @@ namespace Mancala.GameLogic
             return -1;
         }
 
-        public bool IsGameEnded => GetStoneClearedPlayer() != -1;
+        public readonly bool IsGameEnded => GetStoneClearedPlayer() != -1;
 
         public static string ToVisualizeString(Board board, Board? prevBoard = null, Action? action = null)
         {

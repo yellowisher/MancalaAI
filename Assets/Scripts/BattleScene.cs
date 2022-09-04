@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using Mancala.AI;
+﻿using System.Collections;
 using Mancala.GameLogic;
 using NaughtyAttributes;
 using UnityEngine;
@@ -47,7 +45,7 @@ namespace Mancala
 
         [ShowIf(nameof(IsPlaying))]
         [Button]
-        private void StopGame()
+        private void StopPlaying()
         {
             _playingGame = null;
         }
