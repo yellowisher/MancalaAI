@@ -50,9 +50,11 @@ namespace Mancala.GameLogic
          * 
          *       > > Player0 > >
          */
-
         private fixed byte _stoneCounts[Pot.PotCount];
-
+        
+        public const int TotalStoneCount = 12 * 4;
+        public const int HalfOfTotalStoneCount = TotalStoneCount / 2;
+        
         public byte this[Pot pot]
         {
             readonly get => _stoneCounts[pot.Index];

@@ -30,16 +30,21 @@ namespace Mancala.AI
             int opponentScore = board[Pot.ScoringPots[1 - _playerIndex]];
             int difference = myScore - opponentScore;
 
+            int moreThanHalfScore = 0;
+            if (myScore > Board.HalfOfTotalStoneCount) moreThanHalfScore = 1;
+            else if (opponentScore > Board.HalfOfTotalStoneCount) moreThanHalfScore = -1;
+            moreThanHalfScore *= 1000;
+            
             if (depth > MaxDepth)
             {
                 _leafNodeCount++;
-                return (default, difference);
+                return (default, moreThanHalfScore + difference);
             }
 
             if (board.IsGameEnded)
             {
                 _leafNodeCount++;
-                int score = 1000 * Math.Sign(difference) + difference;
+                int score = moreThanHalfScore + difference;
                 return (default, score);
             }
 
