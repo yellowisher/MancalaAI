@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Mancala.GameLogic;
 using UnityEngine;
 using Action = Mancala.GameLogic.Action;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -12,7 +13,9 @@ namespace Mancala.GameLogic
         private readonly List<Player> _players = new(2);
         private int _currentTurnPlayer;
 
-        public void Start(Player player0, Player player1, bool selectRandomStartPlayer = true)
+        public bool IsEnded => _board.IsGameEnded;
+
+        public IEnumerator Start(Player player0, Player player1, bool selectRandomStartPlayer = true)
         {
             _board.Initialize();
             player0.ReadyToPlay(0);
@@ -41,6 +44,7 @@ namespace Mancala.GameLogic
                 
                 log += Board.ToVisualizeString(_board, prevBoard, action);
                 Debug.Log(log);
+                yield return null;
             }
 
             int player0Score = _board[Pot.ScoringPots[0]];

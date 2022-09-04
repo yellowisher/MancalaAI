@@ -167,7 +167,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd1fa93ebf734c11a8a2cfc6e689545c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _player0Type: 2
+  _player0Type: 3
   _player1Type: 2
   _randomStartPlayer: 0
   _maxDepthForMinimax: 10
+  _mctsTimeout: 10
