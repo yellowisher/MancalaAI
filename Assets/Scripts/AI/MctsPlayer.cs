@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Mancala.Common;
 using Mancala.GameLogic;
 using UnityEngine;
 using Action = Mancala.GameLogic.Action;
@@ -8,24 +9,18 @@ using Random = System.Random;
 
 namespace Mancala.AI
 {
+    [Serializable]
     public partial class MctsPlayer : Player
     {
-        private readonly double _searchTimeout;
-        private readonly Random _random = new();
-
-        private const float ExplorationFactor = 2f;
-
-        public MctsPlayer(double searchTimeout)
-        {
-            _searchTimeout = searchTimeout;
-        }
+        public int IterationCount = 50000;
+        public float ExplorationFactor = 2f;
 
         public override Action ChooseAction(in Board board)
         {
             var root = new Node(default, board, _playerIndex, null);
 
-            double searchUntil = Time.realtimeSinceStartupAsDouble + _searchTimeout;
-            while (Time.realtimeSinceStartupAsDouble < searchUntil)
+            int count = IterationCount; 
+            while (count-- > 0)
             {
                 var bestUctNode = SelectLeafNodeWithBestUcb(root);
                 if (!bestUctNode.Board.IsGameEnded)
@@ -36,7 +31,7 @@ namespace Mancala.AI
                 var nodeToExplore = bestUctNode;
                 if (nodeToExplore.Children.Count != 0)
                 {
-                    nodeToExplore = nodeToExplore.Children[_random.Next(nodeToExplore.Children.Count)];
+                    nodeToExplore = nodeToExplore.Children.PickRandom();
                 }
 
                 int simulateResult = SimulateRandomPlayout(nodeToExplore);
@@ -120,7 +115,7 @@ namespace Mancala.AI
             while (!board.IsGameEnded)
             {
                 var actions = board.GetValidActions(player);
-                var randomAction = actions[_random.Next(actions.Count)];
+                var randomAction = actions.PickRandom();
 
                 player = board.PerformAction(randomAction);
             }

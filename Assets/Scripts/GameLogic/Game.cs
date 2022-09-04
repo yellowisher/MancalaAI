@@ -32,8 +32,9 @@ namespace Mancala.GameLogic
             double startTime = Time.realtimeSinceStartupAsDouble;
             while (!_board.IsGameEnded)
             {
+                double startComputationTime = Time.realtimeSinceStartupAsDouble;
                 var action = _players[_currentTurnPlayer].ChooseAction(_board);
-                string log = $"{_currentTurnPlayer}'s Turn, Action: {action}\n";
+                string log = $"{_currentTurnPlayer}'s Turn, Action: {action}, Computation time: {Time.realtimeSinceStartupAsDouble - startComputationTime}\n";
 
                 log += Board.ToVisualizeString(_board);
                 log += "\n";

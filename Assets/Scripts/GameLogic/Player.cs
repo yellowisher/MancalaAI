@@ -1,7 +1,8 @@
-using System.Collections.Generic;
+using System;
 
 namespace Mancala.GameLogic
 {
+    [Serializable]
     public abstract class Player
     {
         protected int _playerIndex;

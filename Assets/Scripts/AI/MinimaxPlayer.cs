@@ -5,15 +5,12 @@ using Action = Mancala.GameLogic.Action;
 
 namespace Mancala.AI
 {
+    [Serializable]
     public class MinimaxPlayer : Player
     {
-        private readonly int _maxDepth;
+        public int MaxDepth = 10;
+        
         private int _leafNodeCount;
-
-        public MinimaxPlayer(int maxDepth)
-        {
-            _maxDepth = maxDepth;
-        }
 
         public override Action ChooseAction(in Board board)
         {
@@ -33,7 +30,7 @@ namespace Mancala.AI
             int opponentScore = board[Pot.ScoringPots[1 - _playerIndex]];
             int difference = myScore - opponentScore;
 
-            if (depth > _maxDepth)
+            if (depth > MaxDepth)
             {
                 _leafNodeCount++;
                 return (default, difference);

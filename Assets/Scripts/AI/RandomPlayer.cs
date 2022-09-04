@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using Mancala.GameLogic;
-using UnityEngine;
+using Action = Mancala.GameLogic.Action;
+using Random = UnityEngine.Random;
 
 namespace Mancala.AI
 {
+    [Serializable]
     public class RandomPlayer : Player
     {
         public override Action ChooseAction(in Board board)

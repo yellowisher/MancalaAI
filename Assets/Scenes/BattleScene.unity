@@ -167,8 +167,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd1fa93ebf734c11a8a2cfc6e689545c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _player0Type: 3
-  _player1Type: 2
+  _player0:
+    rid: 1164876595862175747
+  _player1:
+    rid: 1164876595862175745
   _randomStartPlayer: 0
-  _maxDepthForMinimax: 10
-  _mctsTimeout: 10
+  references:
+    version: 2
+    RefIds:
+    - rid: 1164876595862175745
+      type: {class: MinimaxPlayer, ns: Mancala.AI, asm: Assembly-CSharp}
+      data:
+        MaxDepth: 10
+    - rid: 1164876595862175747
+      type: {class: MctsPlayer, ns: Mancala.AI, asm: Assembly-CSharp}
+      data:
+        IterationCount: 50000
+        ExplorationFactor: 2
