@@ -120,28 +120,40 @@ namespace Mancala.GameLogic
             {
                 nextTurnPlayer = player;
             }
-
+            
+            // Check for game end
+            int clearedPlayer = GetStoneClearedPlayer();
+            if (clearedPlayer != -1)
+            {
+                nextTurnPlayer = -1;
+                int otherPlayer = 1 - clearedPlayer;
+                foreach (var pot in Pot.PlayerPots[otherPlayer])
+                {
+                    this[Pot.ScoringPots[otherPlayer]] += this[pot];
+                    this[pot] = 0;
+                }
+            }
+            
             return nextTurnPlayer;
         }
 
-        public bool IsGameEnded
+        private int GetStoneClearedPlayer()
         {
-            get
+            for (int player = 0; player < 2; player++)
             {
-                for (int player = 0; player < 2; player++)
+                int leftStoneCount = 0;
+                foreach (var pot in Pot.PlayerPots[player]) leftStoneCount += this[pot];
+
+                if (leftStoneCount == 0)
                 {
-                    int leftStoneCount = 0;
-                    foreach (var pot in Pot.PlayerPots[player]) leftStoneCount += this[pot];
-
-                    if (leftStoneCount == 0)
-                    {
-                        return true;
-                    }
+                    return player;
                 }
-
-                return false;
             }
+
+            return -1;
         }
+
+        public bool IsGameEnded => GetStoneClearedPlayer() != -1;
 
         public static string ToVisualizeString(Board board, Board? prevBoard = null, Action? action = null)
         {

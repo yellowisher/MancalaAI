@@ -13,8 +13,6 @@ namespace Mancala.GameLogic
         private readonly List<Player> _players = new(2);
         private int _currentTurnPlayer;
 
-        public bool IsEnded => _board.IsGameEnded;
-
         public IEnumerator Start(Player player0, Player player1, bool selectRandomStartPlayer = true)
         {
             _board.Initialize();
@@ -30,7 +28,7 @@ namespace Mancala.GameLogic
             }
 
             double startTime = Time.realtimeSinceStartupAsDouble;
-            while (!_board.IsGameEnded)
+            while (_currentTurnPlayer != -1)
             {
                 double startComputationTime = Time.realtimeSinceStartupAsDouble;
                 var action = _players[_currentTurnPlayer].ChooseAction(_board);
