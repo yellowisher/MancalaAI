@@ -9,7 +9,9 @@ namespace Mancala
     {
         [SerializeField, SerializeReference, SubclassSelector] private Player _player0;
         [SerializeField, SerializeReference, SubclassSelector] private Player _player1;
-        [SerializeField] private bool _randomStartPlayer;
+        
+        [Header("0 or 1 (otherwise -> random)")]
+        [SerializeField] private int _startPlayer;
 
         private IEnumerator _playingGame;
         private bool IsPlaying => _playingGame != null;
@@ -34,7 +36,7 @@ namespace Mancala
             if (_playingGame == null)
             {
                 var game = new Game();
-                _playingGame = game.Start(_player0, _player1, _randomStartPlayer);
+                _playingGame = game.Start(_player0, _player1, _startPlayer);
             }
 
             if (!_playingGame.MoveNext())

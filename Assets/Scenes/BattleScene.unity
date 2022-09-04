@@ -171,7 +171,7 @@ MonoBehaviour:
     rid: 1164876595862175755
   _player1:
     rid: 1164876595862175756
-  _randomStartPlayer: 0
+  _startPlayer: 0
   references:
     version: 2
     RefIds:

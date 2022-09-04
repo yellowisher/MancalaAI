@@ -13,7 +13,7 @@ namespace Mancala.GameLogic
         private readonly List<Player> _players = new(2);
         private int _currentTurnPlayer;
 
-        public IEnumerator Start(Player player0, Player player1, bool selectRandomStartPlayer = true)
+        public IEnumerator Start(Player player0, Player player1, int startPlayer)
         {
             _board.Initialize();
             player0.ReadyToPlay(0);
@@ -22,9 +22,10 @@ namespace Mancala.GameLogic
             _players.Add(player0);
             _players.Add(player1);
 
-            if (selectRandomStartPlayer)
+            _currentTurnPlayer = startPlayer;
+            if (_currentTurnPlayer != 0 && _currentTurnPlayer != 1)
             {
-                _currentTurnPlayer = Random.Range(0, _players.Count);
+                _currentTurnPlayer = Random.Range(0, 2);
             }
 
             double startTime = Time.realtimeSinceStartupAsDouble;
