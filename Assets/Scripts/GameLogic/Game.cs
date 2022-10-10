@@ -12,11 +12,15 @@ namespace Mancala.GameLogic
         private Board _board;
         private readonly List<Player> _players = new(2);
         private int _currentTurnPlayer;
+
+        private bool _autoProgress;
         
         public bool IsProgressing { get; private set; }
         public bool IsEnded => _currentTurnPlayer == -1;
+        public IReadOnlyList<Player> Players => _players;
+        public Board Board => _board;
 
-        public UniTask Start(Player player0, Player player1, int startPlayer)
+        public UniTask Start(Player player0, Player player1, int startPlayer, bool autoProgress = true)
         {
             _board.Initialize();
             player0.ReadyToPlay(0);
@@ -30,6 +34,8 @@ namespace Mancala.GameLogic
             {
                 _currentTurnPlayer = Random.Range(0, 2);
             }
+
+            _autoProgress = autoProgress;
 
             return Progress();
         }
@@ -73,6 +79,11 @@ namespace Mancala.GameLogic
             }
 
             IsProgressing = false;
+
+            if (_autoProgress)
+            {
+                await Progress();
+            }
         }
 
         private void PerformAction(int player, Action action)

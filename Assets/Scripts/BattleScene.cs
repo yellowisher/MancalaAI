@@ -23,7 +23,7 @@ namespace Mancala
         private async UniTask StartNewGame()
         {
             _playingGame = new Game();
-            await _playingGame.Start(_player0, _player1, _startPlayer);
+            await _playingGame.Start(_player0, _player1, _startPlayer, false);
         }
         
         [Button]

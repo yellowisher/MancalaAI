@@ -9,6 +9,10 @@
             TargetPot = targetPot;
         }
 
+        public Action(int index) : this(new Pot(index))
+        {
+        }
+
         public override string ToString() => TargetPot.Index.ToString();
     }
 }
