@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 
 namespace Mancala.GameLogic
 {
@@ -12,6 +13,6 @@ namespace Mancala.GameLogic
             _playerIndex = playerIndex;
         }
         
-        public abstract Action ChooseAction(in Board board);
+        public abstract UniTask<Action> ChooseAction(Board board);
     }
 }

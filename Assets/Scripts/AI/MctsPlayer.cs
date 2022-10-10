@@ -1,51 +1,57 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using Mancala.Common;
 using Mancala.GameLogic;
 using UnityEngine;
 using Action = Mancala.GameLogic.Action;
-using Random = System.Random;
 
 namespace Mancala.AI
 {
     [Serializable]
     public partial class MctsPlayer : Player
     {
-        public int IterationCount = 50000;
+        public int IterationCount = 10000;
         public float ExplorationFactor = 2f;
 
-        public override Action ChooseAction(in Board board)
+        public override UniTask<Action> ChooseAction(Board board)
         {
-            var root = new Node(default, board, _playerIndex, null);
-
-            int count = IterationCount;
-            while (count-- > 0)
+            return UniTask.RunOnThreadPool(() =>
             {
-                var bestUctNode = SelectLeafNodeWithBestUcb(root);
-                
-                ExpandNode(bestUctNode);
+                var root = new Node(default, board, _playerIndex, null);
 
-                var nodeToExplore = bestUctNode;
-                if (nodeToExplore.Children.Count != 0)
+                int count = IterationCount;
+                while (count-- > 0)
                 {
-                    nodeToExplore = nodeToExplore.Children.PickRandom();
+                    var bestUctNode = SelectLeafNodeWithBestUcb(root);
+
+                    ExpandNode(bestUctNode);
+
+                    var nodeToExplore = bestUctNode;
+                    if (nodeToExplore.Children.Count != 0)
+                    {
+                        nodeToExplore = nodeToExplore.Children.PickRandom();
+                    }
+
+                    int winner = SimulateRandomPlayout(nodeToExplore);
+                    BackPropagate(nodeToExplore, winner);
                 }
 
-                int winner = SimulateRandomPlayout(nodeToExplore);
-                BackPropagate(nodeToExplore, winner);
-            }
-            
-            // Why robust?
-            // https://ai.stackexchange.com/questions/16905/mcts-how-to-choose-the-final-action-from-the-root
-            var bestChild = root.Children.OrderByDescending(child => child.VisitCount).First();
+                // Why robust?
+                // https://ai.stackexchange.com/questions/16905/mcts-how-to-choose-the-final-action-from-the-root
+                var bestChild = root.Children.OrderByDescending(child => child.VisitCount).First();
 
-            string message = $"<color=yellow>[Mcts]</color> Player {_playerIndex} found best action {bestChild.Action}";
-            message = root.Children.Aggregate(message, (current, child) => current + $"\nAction {child.Action}, Visit: {child.VisitCount}, Score: {child.Score}, Ucb: {child.CalculateUcb(root.VisitCount, ExplorationFactor)}");
+                string message = $"<color=yellow>[Mcts]</color> Player {_playerIndex} found best action {bestChild.Action}";
+                message = root.Children.Aggregate(message,
+                    (current, child) =>
+                        current +
+                        $"\nAction {child.Action}, Visit: {child.VisitCount}, Score: {child.Score}, Ucb: {child.CalculateUcb(root.VisitCount, ExplorationFactor)}");
 
-            Debug.Log(message);
+                Debug.Log(message);
 
-            return bestChild.Action;
+                return bestChild.Action;
+            });
         }
     }
 
@@ -140,6 +146,7 @@ namespace Mancala.AI
                 1 => 0,
                 0 => -1,
                 -1 => 1,
+                _ => throw new ArgumentOutOfRangeException()
             };
         }
 

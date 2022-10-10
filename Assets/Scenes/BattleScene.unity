@@ -168,19 +168,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _player0:
-    rid: 1164876595862175755
+    rid: 8812227488188727296
   _player1:
     rid: 1164876595862175756
   _startPlayer: 0
   references:
     version: 2
     RefIds:
-    - rid: 1164876595862175755
-      type: {class: MctsPlayer, ns: Mancala.AI, asm: Assembly-CSharp}
-      data:
-        IterationCount: 50000
-        ExplorationFactor: 2
     - rid: 1164876595862175756
+      type: {class: MinimaxPlayer, ns: Mancala.AI, asm: Assembly-CSharp}
+      data:
+        MaxDepth: 10
+        MoreThanHalfWeight: 1000
+        DifferenceWeight: 1
+    - rid: 8812227488188727296
       type: {class: MinimaxPlayer, ns: Mancala.AI, asm: Assembly-CSharp}
       data:
         MaxDepth: 10

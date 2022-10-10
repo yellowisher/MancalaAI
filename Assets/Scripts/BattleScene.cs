@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using Cysharp.Threading.Tasks;
 using Mancala.GameLogic;
 using NaughtyAttributes;
 using UnityEngine;
@@ -13,40 +13,53 @@ namespace Mancala
         [Header("0 or 1 (otherwise -> random)")]
         [SerializeField] private int _startPlayer;
 
-        private IEnumerator _playingGame;
+        private Game _playingGame;
         private bool IsPlaying => _playingGame != null;
+        private bool IsNotPlaying => !IsPlaying;
+        private bool IsProgressing => _playingGame.IsProgressing;
 
         [Button]
-        private void PlayWholeGame()
+        [ShowIf(nameof(IsNotPlaying))]
+        private async UniTask StartNewGame()
         {
-            if (_playingGame == null)
-            {
-                PlayOneStep();
-            }
-
-            while (IsPlaying)
-            {
-                PlayOneStep();
-            }
+            _playingGame = new Game();
+            await _playingGame.Start(_player0, _player1, _startPlayer);
         }
-
+        
         [Button]
-        private void PlayOneStep()
+        [ShowIf(nameof(IsNotPlaying))]
+        private async void StartNewWholeGame()
         {
-            if (_playingGame == null)
-            {
-                var game = new Game();
-                _playingGame = game.Start(_player0, _player1, _startPlayer);
-            }
-
-            if (!_playingGame.MoveNext())
+            await StartNewGame();
+            PlayWholeGame();
+        }
+        
+        [Button]
+        [ShowIf(nameof(IsPlaying))]
+        [DisableIf(nameof(IsProgressing))]
+        private async UniTask PlayOneStep()
+        {
+            await _playingGame.Progress();
+            if (_playingGame.IsEnded)
             {
                 _playingGame = null;
             }
         }
-
-        [ShowIf(nameof(IsPlaying))]
+        
         [Button]
+        [ShowIf(nameof(IsPlaying))]
+        [DisableIf(nameof(IsProgressing))]
+        private async void PlayWholeGame()
+        {
+            while (IsPlaying)
+            {
+                await PlayOneStep();
+            }
+        }
+
+        [Button]
+        [ShowIf(nameof(IsPlaying))]
+        [DisableIf(nameof(IsProgressing))]
         private void StopPlaying()
         {
             _playingGame = null;

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
 
 namespace Mancala.Common
 {
@@ -7,8 +6,9 @@ namespace Mancala.Common
     {
         public static T PickRandom<T>(this List<T> list)
         {
+            var random = new System.Random();
             if (list == null || list.Count == 0) return default;
-            return list[Random.Range(0, list.Count)];
+            return list[random.Next(list.Count)];
         }
     }
 }

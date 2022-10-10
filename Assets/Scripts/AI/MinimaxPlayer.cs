@@ -1,4 +1,5 @@
 ﻿using System;
+using Cysharp.Threading.Tasks;
 using Mancala.GameLogic;
 using UnityEngine;
 using Action = Mancala.GameLogic.Action;
@@ -14,16 +15,19 @@ namespace Mancala.AI
         
         private int _leafNodeCount;
 
-        public override Action ChooseAction(in Board board)
+        public override UniTask<Action> ChooseAction(Board board)
         {
-            var (action, score) = MinimaxAlphaBetaPrune(board, 0, int.MinValue, int.MaxValue, _playerIndex);
+            return UniTask.RunOnThreadPool(() =>
+            {
+                var (action, score) = MinimaxAlphaBetaPrune(board, 0, int.MinValue, int.MaxValue, _playerIndex);
 
-            Debug.Log($"<color=yellow>[Minimax]</color> Player {_playerIndex} found best action with score: {score}\n" +
-                      $"Leaf node count: {_leafNodeCount}");
+                Debug.Log($"<color=yellow>[Minimax]</color> Player {_playerIndex} found best action with score: {score}\n" +
+                          $"Leaf node count: {_leafNodeCount}");
 
-            _leafNodeCount = 0;
+                _leafNodeCount = 0;
 
-            return action;
+                return action;
+            });
         }
 
         private (Action action, int score) MinimaxAlphaBetaPrune(in Board board, int depth, int alpha, int beta, int playerIndex)
