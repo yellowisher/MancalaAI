@@ -53,5 +53,10 @@ namespace Mancala.Unity
         {
             OnClickEvent.Invoke(_index);
         }
+
+        public void SetOutlineColor(Color color)
+        {
+            _image.color = color;
+        }
     }
 }

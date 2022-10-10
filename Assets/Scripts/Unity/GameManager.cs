@@ -9,11 +9,16 @@ namespace Mancala.Unity
 {
     public class GameManager : MonoBehaviour
     {
+        [SerializeField] private float _renderDelay;
+        
         [SerializeField] private TMP_Dropdown _player0Dropdown;
         [SerializeField] private TMP_Dropdown _player1Dropdown;
         [SerializeField] private TMP_Dropdown _startPlayerDropdown;
 
         private Game _playingGame;
+        private Pot _pickingPot;
+        private float _nextRenderTime;
+        private readonly Queue<BoardRenderData> _renderQueue = new();
         
         public List<Pot> Pots { get; private set; }
         
@@ -35,9 +40,13 @@ namespace Mancala.Unity
             _player0Dropdown.options = options;
             _player1Dropdown.options = options;
 
-            Pots = FindObjectsOfType<Pot>()
+            Pots = FindObjectsOfType<Pot>(true)
                 .OrderBy(pot => pot.Index)
                 .ToList();
+
+            // Picking pot for animation
+            _pickingPot = Pots[0];
+            Pots.RemoveAt(0);
             
             Pot.OnClickEvent.AddListener(OnClick_Pot);
 
@@ -47,21 +56,42 @@ namespace Mancala.Unity
         public void StartNewGame()
         {
             _playingGame = new Game();
-            _playingGame.RenderBoardAction = RenderBoard;
+            _playingGame.RenderBoardFunction = AppendRenderData;
 
             var player0 = PlayerFactory.Create(GetPlayerTypeFromDropdownIndex(_player0Dropdown.value));
             var player1 = PlayerFactory.Create(GetPlayerTypeFromDropdownIndex(_player1Dropdown.value));
             int startPlayer = _startPlayerDropdown.value;
 
+            _renderQueue.Clear();
             _playingGame.Start(player0, player1, startPlayer);
         }
 
-        private void RenderBoard(Board board)
+        private void AppendRenderData((Game game, BoardRenderData data) pair)
+        {
+            if (_playingGame != pair.game) return;
+            _renderQueue.Enqueue(pair.data);
+        }
+
+        private void Update()
+        {
+            if (Time.time < _nextRenderTime) return;
+            if (_renderQueue.Count == 0) return;
+
+            _nextRenderTime = Time.time + _renderDelay;
+            RenderBoard(_renderQueue.Dequeue());
+        }
+
+        private void RenderBoard(BoardRenderData data)
         {
             for (int i = 0; i < GameLogic.Pot.PotCount; i++)
             {
-                Pots[i].SetStoneCount(board[new GameLogic.Pot(i)]);
+                Pots[i].SetStoneCount(data.Board[new GameLogic.Pot(i)]);
+                bool isActionStartedPot = data.Action != null && data.Action.Value.TargetPot.Index == i;
+                Pots[i].SetOutlineColor(isActionStartedPot ? Color.red : Color.black);
             }
+
+            _pickingPot.gameObject.SetActive(data.PickedCount > 0);
+            _pickingPot.SetStoneCount(data.PickedCount);
         }
         
         private void OnClick_Pot(int index)

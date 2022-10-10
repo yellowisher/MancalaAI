@@ -18,7 +18,7 @@ namespace Mancala.GameLogic
         public bool IsProgressing { get; private set; }
         public bool IsEnded => _currentTurnPlayer == -1;
         public IReadOnlyList<Player> Players => _players;
-        public Action<Board> RenderBoardAction { get; set; }
+        public Action<(Game game, BoardRenderData data)> RenderBoardFunction { get; set; }
 
         public UniTask Start(Player player0, Player player1, int startPlayer, bool autoProgress = true)
         {
@@ -37,7 +37,7 @@ namespace Mancala.GameLogic
 
             _autoProgress = autoProgress;
 
-            RenderBoardAction?.Invoke(_board);
+            RenderBoardFunction?.Invoke((this, new BoardRenderData(_board)));
             return Progress();
         }
 
@@ -60,8 +60,7 @@ namespace Mancala.GameLogic
             log += "\n";
 
             var prevBoard = _board;
-            PerformAction(_currentTurnPlayer, action);
-            RenderBoardAction?.Invoke(_board);
+            PerformAction(_currentTurnPlayer, action, data => RenderBoardFunction?.Invoke((this, data)));
 
             log += Board.ToVisualizeString(_board, prevBoard, action);
             Debug.Log(log);
@@ -88,7 +87,7 @@ namespace Mancala.GameLogic
             }
         }
 
-        private void PerformAction(int player, Action action)
+        private void PerformAction(int player, Action action, Action<BoardRenderData> renderBoardFunction)
         {
             var validActions = _board.GetValidActions(player);
             if (!validActions.Contains(action))
@@ -99,7 +98,7 @@ namespace Mancala.GameLogic
                                     $"While valid actions are: {string.Concat(validActions.Select(a => $"{a}, "))}");
             }
 
-            _currentTurnPlayer = _board.PerformAction(action);
+            _currentTurnPlayer = _board.PerformAction(action, renderBoardFunction);
         }
     }
 }

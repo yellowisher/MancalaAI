@@ -83,7 +83,7 @@ namespace Mancala.GameLogic
             return actions;
         }
 
-        public int PerformAction(Action action)
+        public int PerformAction(Action action, Action<BoardRenderData> renderFunction = null)
         {
             int player = Pot.PlayerPots[0].Contains(action.TargetPot) ? 0 : 1;
             int opponent = 1 - player;
@@ -101,6 +101,8 @@ namespace Mancala.GameLogic
 
                 remainStones--;
                 this[cursor]++;
+
+                renderFunction?.Invoke(new BoardRenderData(this, remainStones, action, cursor));
             }
 
             var lastPot = cursor;
@@ -138,6 +140,7 @@ namespace Mancala.GameLogic
                 }
             }
             
+            renderFunction?.Invoke(new BoardRenderData(this, remainStones, action, cursor));
             return nextTurnPlayer;
         }
 
