@@ -51,10 +51,10 @@ namespace Mancala.GameLogic
          *       > > Player0 > >
          */
         private fixed byte _stoneCounts[Pot.PotCount];
-        
+
         public const int TotalStoneCount = 12 * 4;
         public const int HalfOfTotalStoneCount = TotalStoneCount / 2;
-        
+
         public byte this[Pot pot]
         {
             readonly get => _stoneCounts[pot.Index];
@@ -126,7 +126,7 @@ namespace Mancala.GameLogic
             {
                 nextTurnPlayer = player;
             }
-            
+
             // Check for game end
             int clearedPlayer = GetStoneClearedPlayer();
             if (clearedPlayer != -1)
@@ -139,7 +139,7 @@ namespace Mancala.GameLogic
                     this[pot] = 0;
                 }
             }
-            
+
             renderFunction?.Invoke(new BoardRenderData(this, remainStones, action, cursor));
             return nextTurnPlayer;
         }
@@ -157,6 +157,18 @@ namespace Mancala.GameLogic
                 }
             }
 
+            return -1;
+        }
+
+        public int GetWinner()
+        {
+            if (!IsGameEnded) throw new Exception("Game is not ended");
+            
+            int player0Score = this[Pot.ScoringPots[0]];
+            int player1Score = this[Pot.ScoringPots[1]];
+
+            if (player0Score > player1Score) return 0;
+            if (player0Score < player1Score) return 1;
             return -1;
         }
 

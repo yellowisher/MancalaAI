@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Mancala
 {
-    public class BattleScene : MonoBehaviour
+    public class TestScene : MonoBehaviour
     {
         [SerializeField, SerializeReference, SubclassSelector] private Player _player0;
         [SerializeField, SerializeReference, SubclassSelector] private Player _player1;

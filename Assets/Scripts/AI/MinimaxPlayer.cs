@@ -1,7 +1,6 @@
 ﻿using System;
 using Cysharp.Threading.Tasks;
 using Mancala.GameLogic;
-using UnityEngine;
 using Action = Mancala.GameLogic.Action;
 
 namespace Mancala.AI
@@ -21,7 +20,7 @@ namespace Mancala.AI
             {
                 var (action, score) = MinimaxAlphaBetaPrune(board, 0, int.MinValue, int.MaxValue, _playerIndex);
 
-                Debug.Log($"<color=yellow>[Minimax]</color> Player {_playerIndex} found best action with score: {score}\n" +
+                Log($"<color=yellow>[Minimax]</color> Player {_playerIndex} found best action with score: {score}\n" +
                           $"Leaf node count: {_leafNodeCount}");
 
                 _leafNodeCount = 0;

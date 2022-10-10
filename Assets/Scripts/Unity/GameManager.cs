@@ -63,6 +63,11 @@ namespace Mancala.Unity
             int startPlayer = _startPlayerDropdown.value;
 
             _renderQueue.Clear();
+            foreach (var pot in Pots)
+            {
+                pot.SetInteractable(false);
+            }
+            
             _playingGame.Start(player0, player1, startPlayer);
         }
 

@@ -4,7 +4,6 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Mancala.Common;
 using Mancala.GameLogic;
-using UnityEngine;
 using Action = Mancala.GameLogic.Action;
 
 namespace Mancala.AI
@@ -48,14 +47,14 @@ namespace Mancala.AI
                         current +
                         $"\nAction {child.Action}, Visit: {child.VisitCount}, Score: {child.Score}, Ucb: {child.CalculateUcb(root.VisitCount, ExplorationFactor)}");
 
-                Debug.Log(message);
+                Log(message);
 
                 return bestChild.Action;
             });
         }
     }
 
-    public partial class MctsPlayer : Player
+    public partial class MctsPlayer
     {
         private class Node
         {

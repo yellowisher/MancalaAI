@@ -17,8 +17,11 @@ namespace Mancala.GameLogic
         
         public bool IsProgressing { get; private set; }
         public bool IsEnded => _currentTurnPlayer == -1;
+        public int Winner => _board.GetWinner();
         public IReadOnlyList<Player> Players => _players;
+        
         public Action<(Game game, BoardRenderData data)> RenderBoardFunction { get; set; }
+        public bool IsSilent { get; set; }
 
         public UniTask Start(Player player0, Player player1, int startPlayer, bool autoProgress = true)
         {
@@ -63,20 +66,26 @@ namespace Mancala.GameLogic
             PerformAction(_currentTurnPlayer, action, data => RenderBoardFunction?.Invoke((this, data)));
 
             log += Board.ToVisualizeString(_board, prevBoard, action);
-            Debug.Log(log);
+            Log(log);
 
             if (IsEnded)
             {
                 int player0Score = _board[Pot.ScoringPots[0]];
                 int player1Score = _board[Pot.ScoringPots[1]];
+                
+                int winner = _board.GetWinner();
 
-                string resultString = $"Game End! ";
-                if (player0Score > player1Score) resultString += $"{_players[0]} Win!\n";
-                else if (player0Score < player1Score) resultString += $"{_players[1]} Win!\n";
-                else resultString += "Draw!\n";
+                string resultString = "Game End! ";
+                resultString += winner switch
+                {
+                    0 => $"{_players[0]} Win!\n",
+                    1 => $"{_players[1]} Win!\n",
+                    -1 => "Draw!\n",
+                    _ => throw new ArgumentOutOfRangeException(),
+                };
 
                 resultString += $"Player 0({player0Score}) Player 1({player1Score})\n";
-                Debug.Log(resultString);
+                Log(resultString);
             }
 
             IsProgressing = false;
@@ -85,6 +94,13 @@ namespace Mancala.GameLogic
             {
                 await Progress();
             }
+        }
+
+        private void Log(string message)
+        {
+            if (IsSilent) return;
+            
+            Debug.Log(message);
         }
 
         private void PerformAction(int player, Action action, Action<BoardRenderData> renderBoardFunction)
