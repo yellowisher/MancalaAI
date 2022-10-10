@@ -23,11 +23,11 @@ namespace Mancala.AI
                 int count = IterationCount;
                 while (count-- > 0)
                 {
-                    var bestUctNode = SelectLeafNodeWithBestUcb(root);
+                    var bestUcbNode = SelectLeafNodeWithBestUcb(root);
 
-                    ExpandNode(bestUctNode);
+                    ExpandNode(bestUcbNode);
 
-                    var nodeToExplore = bestUctNode;
+                    var nodeToExplore = bestUcbNode;
                     if (nodeToExplore.Children.Count != 0)
                     {
                         nodeToExplore = nodeToExplore.Children.PickRandom();
@@ -78,8 +78,9 @@ namespace Mancala.AI
 
             public float CalculateUcb(int totalVisitCount, float explorationFactor)
             {
+                if (VisitCount == 0) return float.MaxValue;
                 float exploitation = (float)Score / VisitCount;
-                float exploration =  MathF.Sqrt(MathF.Log(totalVisitCount) / VisitCount);
+                float exploration = MathF.Sqrt(MathF.Log(totalVisitCount) / VisitCount);
                 return exploitation + explorationFactor * exploration;
             }
         }
@@ -93,11 +94,7 @@ namespace Mancala.AI
 
                 foreach (var child in node.Children)
                 {
-                    float ucb = float.MaxValue;
-                    if (child.VisitCount > 0)
-                    {
-                        ucb = child.CalculateUcb(node.VisitCount, ExplorationFactor);
-                    }
+                    float ucb = child.CalculateUcb(node.VisitCount, ExplorationFactor);
 
                     if (ucb > bestUcb)
                     {
@@ -126,7 +123,7 @@ namespace Mancala.AI
 
         private int SimulateRandomPlayout(Node node)
         {
-            int player = _playerIndex;
+            int player = node.CurrentPlayer;
             var board = node.Board;
             while (!board.IsGameEnded)
             {
