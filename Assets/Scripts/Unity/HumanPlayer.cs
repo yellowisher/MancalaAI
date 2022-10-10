@@ -14,15 +14,27 @@ namespace Mancala.Unity
         {
             _tcs = new UniTaskCompletionSource<Action>();
             _board = board;
+
+            SetInteractablePots(true);
             return _tcs.Task;
         }
 
+        private void SetInteractablePots(bool isInteractable)
+        {
+            foreach (var action in _board.GetValidActions(_playerIndex))
+            {
+                GameManager.Instance.Pots[action.TargetPot.Index].SetInteractable(isInteractable);
+            }
+        } 
+        
         public void OnClick_Pot(int index)
         {
             if (!_isChoosing) return;
             if (!GameLogic.Pot.PlayerPots[_playerIndex].Contains(new GameLogic.Pot(index))) return;
             if (_board[new GameLogic.Pot(index)] == 0) return;
 
+            SetInteractablePots(false);
+            
             var prevTcs = _tcs;
             _tcs = null;
             

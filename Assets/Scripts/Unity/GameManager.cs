@@ -13,8 +13,16 @@ namespace Mancala.Unity
         [SerializeField] private TMP_Dropdown _player1Dropdown;
         [SerializeField] private TMP_Dropdown _startPlayerDropdown;
 
-        private List<Pot> _pots;
         private Game _playingGame;
+        
+        public List<Pot> Pots { get; private set; }
+        
+        public static GameManager Instance { get; private set; }
+
+        private void Awake()
+        {
+            Instance = this;
+        }
 
         private void Start()
         {
@@ -27,7 +35,7 @@ namespace Mancala.Unity
             _player0Dropdown.options = options;
             _player1Dropdown.options = options;
 
-            _pots = FindObjectsOfType<Pot>()
+            Pots = FindObjectsOfType<Pot>()
                 .OrderBy(pot => pot.Index)
                 .ToList();
             
@@ -39,6 +47,7 @@ namespace Mancala.Unity
         public void StartNewGame()
         {
             _playingGame = new Game();
+            _playingGame.RenderBoardAction = RenderBoard;
 
             var player0 = PlayerFactory.Create(GetPlayerTypeFromDropdownIndex(_player0Dropdown.value));
             var player1 = PlayerFactory.Create(GetPlayerTypeFromDropdownIndex(_player1Dropdown.value));
@@ -47,11 +56,11 @@ namespace Mancala.Unity
             _playingGame.Start(player0, player1, startPlayer);
         }
 
-        public void RenderBoard()
+        private void RenderBoard(Board board)
         {
             for (int i = 0; i < GameLogic.Pot.PotCount; i++)
             {
-                _pots[i].SetStoneCount(_playingGame.Board[new GameLogic.Pot(i)]);
+                Pots[i].SetStoneCount(board[new GameLogic.Pot(i)]);
             }
         }
         

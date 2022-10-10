@@ -18,7 +18,7 @@ namespace Mancala.GameLogic
         public bool IsProgressing { get; private set; }
         public bool IsEnded => _currentTurnPlayer == -1;
         public IReadOnlyList<Player> Players => _players;
-        public Board Board => _board;
+        public Action<Board> RenderBoardAction { get; set; }
 
         public UniTask Start(Player player0, Player player1, int startPlayer, bool autoProgress = true)
         {
@@ -37,6 +37,7 @@ namespace Mancala.GameLogic
 
             _autoProgress = autoProgress;
 
+            RenderBoardAction?.Invoke(_board);
             return Progress();
         }
 
@@ -60,6 +61,7 @@ namespace Mancala.GameLogic
 
             var prevBoard = _board;
             PerformAction(_currentTurnPlayer, action);
+            RenderBoardAction?.Invoke(_board);
 
             log += Board.ToVisualizeString(_board, prevBoard, action);
             Debug.Log(log);
