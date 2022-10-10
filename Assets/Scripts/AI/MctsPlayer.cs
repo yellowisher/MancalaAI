@@ -11,7 +11,7 @@ namespace Mancala.AI
     [Serializable]
     public partial class MctsPlayer : Player
     {
-        public int IterationCount = 10000;
+        public int IterationCount = 20000;
         public float ExplorationFactor = 2f;
 
         public override UniTask<Action> ChooseAction(Board board)
@@ -136,17 +136,7 @@ namespace Mancala.AI
                 player = board.PerformAction(randomAction);
             }
 
-            int playerScore = board[Pot.ScoringPots[_playerIndex]];
-            int opponentScore = board[Pot.ScoringPots[1 - _playerIndex]];
-            
-            // Sign of score difference to winner (-1 when draw)
-            return Math.Sign(playerScore - opponentScore) switch
-            {
-                1 => 0,
-                0 => -1,
-                -1 => 1,
-                _ => throw new ArgumentOutOfRangeException()
-            };
+            return board.GetWinner();
         }
 
         private void BackPropagate(Node node, int winner)
