@@ -29,6 +29,9 @@ namespace Mancala.GameLogic
             player0.ReadyToPlay(0);
             player1.ReadyToPlay(1);
 
+            player0.IsSilent = IsSilent;
+            player1.IsSilent = IsSilent;
+
             _players.Add(player0);
             _players.Add(player1);
 
