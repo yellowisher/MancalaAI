@@ -117,6 +117,8 @@ namespace Mancala.GameLogic
                     this[lastPot] = 0;
                     this[opponentPot] = 0;
                     this[Pot.ScoringPots[player]] += sum;
+                    
+                    renderFunction?.Invoke(new BoardRenderData(this));
                 }
             }
 
@@ -138,9 +140,10 @@ namespace Mancala.GameLogic
                     this[Pot.ScoringPots[otherPlayer]] += this[pot];
                     this[pot] = 0;
                 }
+                
+                renderFunction?.Invoke(new BoardRenderData(this));
             }
 
-            renderFunction?.Invoke(new BoardRenderData(this, remainStones, action, cursor));
             return nextTurnPlayer;
         }
 
