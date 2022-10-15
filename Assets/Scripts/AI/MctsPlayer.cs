@@ -11,8 +11,8 @@ namespace Mancala.AI
     [Serializable]
     public partial class MctsPlayer : Player
     {
-        public int IterationCount = 20000;
-        public float ExplorationFactor = 2f;
+        public int IterationCount = 8000;
+        public float ExplorationFactor = MathF.Sqrt(2f);
 
         public override UniTask<Action> ChooseAction(Board board)
         {
@@ -79,7 +79,7 @@ namespace Mancala.AI
             public float CalculateUcb(int totalVisitCount, float explorationFactor)
             {
                 if (VisitCount == 0) return float.MaxValue;
-                float exploitation = (float)Score / VisitCount;
+                float exploitation = Score * 0.5f / VisitCount;
                 float exploration = MathF.Sqrt(MathF.Log(totalVisitCount) / VisitCount);
                 return exploitation + explorationFactor * exploration;
             }
@@ -142,7 +142,6 @@ namespace Mancala.AI
             {
                 node.VisitCount++;
 
-                // Do not calculate score of root node
                 if (node.Parent != null && winner != -1)
                 {
                     node.Score += winner == node.Parent.CurrentPlayer ? 1 : -1;

@@ -187,7 +187,7 @@ namespace Mancala.GameLogic
             str += "\n";
             str += Pot.PlayerPots[0].Aggregate("", (current, pot) => $"{current}\t{GetColoredString(pot)}");
             str += "\n";
-            str += "\t\t<\t  Player 0\t<";
+            str += "\t\t>\t  Player 0\t>";
             return str;
 
 

@@ -8,9 +8,9 @@ namespace Mancala.AI
     [Serializable]
     public class MinimaxPlayer : Player
     {
-        public int MaxDepth = 10;
-        public int MoreThanHalfWeight = 1000;
-        public int DifferenceWeight = 1;
+        public int MaxDepth = 7;
+        public int WeightScoreDifference = 1;
+        public int WeightStonesOnSideDifference = 0;
         
         private int _leafNodeCount;
 
@@ -31,27 +31,37 @@ namespace Mancala.AI
 
         private (Action action, int score) MinimaxAlphaBetaPrune(in Board board, int depth, int alpha, int beta, int playerIndex)
         {
-            int myScore = board[Pot.ScoringPots[_playerIndex]];
-            int opponentScore = board[Pot.ScoringPots[1 - _playerIndex]];
-            int difference = myScore - opponentScore;
-
-            int moreThanHalf = 0;
-            if (myScore > Board.HalfOfTotalStoneCount) moreThanHalf = 1;
-            else if (opponentScore > Board.HalfOfTotalStoneCount) moreThanHalf = -1;
-
-            int evaluatedScore = moreThanHalf * MoreThanHalfWeight + difference * DifferenceWeight;
-            if (depth > MaxDepth)
+            if (depth > MaxDepth || board.IsGameEnded)
             {
                 _leafNodeCount++;
+
+                int opponent = 1 - _playerIndex;
+                
+                int myScore = board[Pot.ScoringPots[_playerIndex]];
+                int opponentScore = board[Pot.ScoringPots[opponent]];
+                int scoreDifference = myScore - opponentScore;
+
+                int stonesOnMySide = 0;
+                foreach (var pot in Pot.PlayerPots[_playerIndex])
+                {
+                    stonesOnMySide += board[pot];
+                }
+
+                int stonesOnOpponentSide = 0;
+                foreach (var pot in Pot.PlayerPots[opponent])
+                {
+                    stonesOnOpponentSide += board[pot];
+                }
+
+                int stonesOnSideDifference = stonesOnMySide - stonesOnOpponentSide; 
+
+                int evaluatedScore =
+                    WeightScoreDifference * scoreDifference +
+                    WeightStonesOnSideDifference * stonesOnSideDifference;
+
                 return (default, evaluatedScore);
             }
-
-            if (board.IsGameEnded)
-            {
-                _leafNodeCount++;
-                return (default, evaluatedScore);
-            }
-
+            
             int bestScore;
             Action bestAction = default;
 
@@ -64,7 +74,9 @@ namespace Mancala.AI
                     var newBoard = board;
                     int nextPlayer = newBoard.PerformAction(action);
 
-                    var (_, score) = MinimaxAlphaBetaPrune(newBoard, depth + 1, alpha, beta, nextPlayer);
+                    int nextDepth = depth + (nextPlayer == playerIndex ? 0 : 1);
+                    var (_, score) = MinimaxAlphaBetaPrune(newBoard, nextDepth, alpha, beta, nextPlayer);
+                    
                     if (score > bestScore)
                     {
                         bestScore = score;
@@ -84,7 +96,8 @@ namespace Mancala.AI
                     var newBoard = board;
                     int nextPlayer = newBoard.PerformAction(action);
 
-                    var (_, score) = MinimaxAlphaBetaPrune(newBoard, depth + 1, alpha, beta, nextPlayer);
+                    int nextDepth = depth + (nextPlayer == playerIndex ? 0 : 1);
+                    var (_, score) = MinimaxAlphaBetaPrune(newBoard, nextDepth, alpha, beta, nextPlayer);
                     if (score < bestScore)
                     {
                         bestScore = score;
