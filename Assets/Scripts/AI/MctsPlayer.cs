@@ -4,6 +4,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Mancala.Common;
 using Mancala.GameLogic;
+using UnityEngine;
 using Action = Mancala.GameLogic.Action;
 
 namespace Mancala.AI
@@ -13,44 +14,49 @@ namespace Mancala.AI
     {
         public int IterationCount = 8000;
         public float ExplorationFactor = MathF.Sqrt(2f);
+        public double ComputationBudgetForOneFrame = 0.16;
 
-        public override UniTask<Action> ChooseAction(Board board)
+        public override async UniTask<Action> ChooseAction(Board board)
         {
-            return UniTask.RunOnThreadPool(() =>
+            var root = new Node(default, board, _playerIndex, null);
+
+            double computeUntil = Time.realtimeSinceStartupAsDouble + ComputationBudgetForOneFrame; 
+            int count = IterationCount;
+            while (count-- > 0)
             {
-                var root = new Node(default, board, _playerIndex, null);
+                var bestUcbNode = SelectLeafNodeWithBestUcb(root);
 
-                int count = IterationCount;
-                while (count-- > 0)
+                ExpandNode(bestUcbNode);
+
+                var nodeToExplore = bestUcbNode;
+                if (nodeToExplore.Children.Count != 0)
                 {
-                    var bestUcbNode = SelectLeafNodeWithBestUcb(root);
-
-                    ExpandNode(bestUcbNode);
-
-                    var nodeToExplore = bestUcbNode;
-                    if (nodeToExplore.Children.Count != 0)
-                    {
-                        nodeToExplore = nodeToExplore.Children.PickRandom();
-                    }
-
-                    int winner = SimulateRandomPlayout(nodeToExplore);
-                    BackPropagate(nodeToExplore, winner);
+                    nodeToExplore = nodeToExplore.Children.PickRandom();
                 }
 
-                // Why robust?
-                // https://ai.stackexchange.com/questions/16905/mcts-how-to-choose-the-final-action-from-the-root
-                var bestChild = root.Children.OrderByDescending(child => child.VisitCount).First();
+                int winner = SimulateRandomPlayout(nodeToExplore);
+                BackPropagate(nodeToExplore, winner);
 
-                string message = $"<color=yellow>[Mcts]</color> Player {_playerIndex} found best action {bestChild.Action}";
-                message = root.Children.Aggregate(message,
-                    (current, child) =>
-                        current +
-                        $"\nAction {child.Action}, Visit: {child.VisitCount}, Score: {child.Score}, Ucb: {child.CalculateUcb(root.VisitCount, ExplorationFactor)}");
+                if (Time.realtimeSinceStartupAsDouble > computeUntil)
+                {
+                    await UniTask.NextFrame();
+                    computeUntil = Time.realtimeSinceStartupAsDouble + ComputationBudgetForOneFrame;
+                }
+            }
 
-                Log(message);
+            // Why robust?
+            // https://ai.stackexchange.com/questions/16905/mcts-how-to-choose-the-final-action-from-the-root
+            var bestChild = root.Children.OrderByDescending(child => child.VisitCount).First();
 
-                return bestChild.Action;
-            });
+            string message = $"<color=yellow>[Mcts]</color> Player {_playerIndex} found best action {bestChild.Action}";
+            message = root.Children.Aggregate(message,
+                (current, child) =>
+                    current +
+                    $"\nAction {child.Action}, Visit: {child.VisitCount}, Score: {child.Score}, Ucb: {child.CalculateUcb(root.VisitCount, ExplorationFactor)}");
+
+            Log(message);
+
+            return bestChild.Action;
         }
     }
 

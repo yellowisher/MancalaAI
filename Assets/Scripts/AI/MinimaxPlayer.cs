@@ -14,19 +14,34 @@ namespace Mancala.AI
         
         private int _leafNodeCount;
 
-        public override UniTask<Action> ChooseAction(Board board)
+        public override async UniTask<Action> ChooseAction(Board board)
         {
-            return UniTask.RunOnThreadPool(() =>
+            int bestScore = int.MinValue;
+            Action bestAction = default;
+
+            foreach (var action in board.GetValidActions(_playerIndex))
             {
-                var (action, score) = MinimaxAlphaBetaPrune(board, 0, int.MinValue, int.MaxValue, _playerIndex);
+                var newBoard = board;
+                int nextPlayer = newBoard.PerformAction(action);
 
-                Log($"<color=yellow>[Minimax]</color> Player {_playerIndex} found best action with score: {score}\n" +
-                          $"Leaf node count: {_leafNodeCount}");
+                int nextDepth = nextPlayer == _playerIndex ? 0 : 1;
+                var (_, score) = MinimaxAlphaBetaPrune(newBoard, nextDepth, int.MinValue, int.MaxValue, nextPlayer);
+                    
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestAction = action;
+                }
 
-                _leafNodeCount = 0;
+                await UniTask.NextFrame();
+            }
 
-                return action;
-            });
+            Log($"<color=yellow>[Minimax]</color> Player {_playerIndex} found best action with score: {bestAction}\n" +
+                $"Leaf node count: {_leafNodeCount}");
+
+            _leafNodeCount = 0;
+
+            return bestAction;
         }
 
         private (Action action, int score) MinimaxAlphaBetaPrune(in Board board, int depth, int alpha, int beta, int playerIndex)
