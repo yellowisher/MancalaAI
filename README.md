@@ -26,7 +26,7 @@ Not much interesting things here :p I used fixed array for stack-live board stat
 ## Experiments
 | Matchup (first=start)  | Win    | Lose   | Draw   |
 | ---------------------- | ------ | ------ | ------ |
-| Random vs Random       | 23.2%  |     %  |     %  |
+| Random vs Random       |     %  |     %  |     %  |
 | Random vs Minimax      |     %  |     %  |     %  |
 | Random vs MCTS         |     %  |     %  |     %  |
 | Minimax vs Random      |     %  |     %  |     %  |
