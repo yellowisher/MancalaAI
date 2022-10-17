@@ -22,7 +22,7 @@ But minimax is more strict. It is right for its depth. MCTS is more rough but de
 So it is make sense that there is some `Minimax-MCTS hybrid` approach, MCTS for big picture and minimax for details.
 
 Best action selection at root node (after enough iteration of `selection-expand-simuate-back propagation`) is selecting *robust child* (child with most visit).
-This isn't intuitive for me, and still I'm not sure about it. ([about this](https://ai.stackexchange.com/questions/16905/mcts-how-to-choose-the-final-action-from-the-root) about it)
+This isn't intuitive for me, and still I'm not sure about it. ([link](https://ai.stackexchange.com/questions/16905/mcts-how-to-choose-the-final-action-from-the-root) about it)
 
 ### Implementation
 Not much interesting things here :p I used fixed array for stack-live board state, and removed threading for WebGL build.
