@@ -1,4 +1,4 @@
-# Mancala
+# MancalaAI
 Yet another mancala AI (Minimax, MCTS) implementation.  
 Even though [mancala is solved game](https://jabaier.sitios.ing.uc.cl/iic2622/kalah.pdf), it is still interesting environment for learning those algorithms.  
 You can play it [here](https://yapy.itch.io/mancalaai).
@@ -24,18 +24,18 @@ But minimax is more strict. It is right for their depth. MCTS is more rough but 
 Not much interesting things here :p I used fixed array for stack-live board state, and removed threading for WebGL build.
 
 ## Experiments
-| Match up (first=start) | Win   | Lose  | Draw  |
-| ---------------------- | ----- | ----- | ----- |
-| Random vs Random       |     % | %     |     - |
-| Random vs Minimax      |     % | %     |     - |
-| Random vs MCTS         |     % | %     |     - |
-| Minimax vs Random      |     % | %     |     - |
-| Minimax vs Minimax     |     %*| %     |     - |
-| Minimax vs MCTS        |     % | %     |     - |
-| MCTS vs Random         |     % | %     |     - |
-| MCTS vs Minimax        |     % | %     |     - |
-| MCTS vs MCTS           |     % | %     |     - |
+| Matchup (first=start)  | Win    | Lose   | Draw   |
+| ---------------------- | ------ | ------ | ------ |
+| Random vs Random       | 23.2%  |     %  |     %  |
+| Random vs Minimax      |     %  |     %  |     %  |
+| Random vs MCTS         |     %  |     %  |     %  |
+| Minimax vs Random      |     %  |     %  |     %  |
+| Minimax vs Minimax     |     %* |     %  |     %  |
+| Minimax vs MCTS        |     %  |     %  |     %  |
+| MCTS vs Random         |     %  |     %  |     %  |
+| MCTS vs Minimax        |     %  |     %  |     %  |
+| MCTS vs MCTS           |     %  |     %  |     %  |
 
 \* My implementation of minimax doesn't contain any randomness.
 
-I tested with depth 7 for minimax, 8000 iteration for MCTS. Each match up is played 1000 times.
+I tested with depth 7 for minimax, 8000 iteration for MCTS. Each matchup is played 1000 times. (still running!)
