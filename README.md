@@ -30,16 +30,16 @@ Not much interesting things here :p I used fixed array for stack-live board stat
 ## Experiments
 | Matchup (first=start)  | Win    | Lose   | Draw   |
 | ---------------------- | ------ | ------ | ------ |
-| Random vs Random       |     %  |     %  |     %  |
-| Random vs Minimax      |     %  |     %  |     %  |
-| Random vs MCTS         |     %  |     %  |     %  |
-| Minimax vs Random      |     %  |     %  |     %  |
-| Minimax vs Minimax     |     %* |     %  |     %  |
-| Minimax vs MCTS        |     %  |     %  |     %  |
-| MCTS vs Random         |     %  |     %  |     %  |
-| MCTS vs Minimax        |     %  |     %  |     %  |
-| MCTS vs MCTS           |     %  |     %  |     %  |
+| Random vs Random       | 47.4%  | 46.8%  |  5.8%  |
+| Random vs Minimax      |  0.1%  | 99.7%  |  0.2%  |
+| Random vs MCTS         |     -  | 99.9%  |  0.1%  |
+| Minimax vs Random      |  100%  |     -  |     -  |
+| Minimax vs Minimax     |  100%* |     -  |     -  |
+| Minimax vs MCTS        |  100%  |     -  |     -  |
+| MCTS vs Random         |  100%  |     -  |     -  |
+| MCTS vs Minimax        | 27.9%  | 57.2%  | 14.9%  |
+| MCTS vs MCTS           | 70.4%  | 21.9%  |  7.7%  |
 
 \* My implementation of minimax doesn't contain any randomness.
 
-I tested with depth 7 for minimax, 8000 iteration for MCTS. Each matchup is played 1000 times. (still running!)
+I tested with depth 7 for minimax, 8000 iteration for MCTS. Each matchup is played 1000 times.  
